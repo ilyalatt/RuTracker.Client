@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuTracker.Client", "src\RuTracker.Client\RuTracker.Client.csproj", "{1318AC30-6320-4CEB-A68F-3EE964EFC30B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuTracker.Client.Playground", "src\RuTracker.Client.Playground\RuTracker.Client.Playground.csproj", "{2F78D6E4-9A8B-44F9-8A20-B061FB3688E5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1318AC30-6320-4CEB-A68F-3EE964EFC30B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1318AC30-6320-4CEB-A68F-3EE964EFC30B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1318AC30-6320-4CEB-A68F-3EE964EFC30B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1318AC30-6320-4CEB-A68F-3EE964EFC30B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F78D6E4-9A8B-44F9-8A20-B061FB3688E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F78D6E4-9A8B-44F9-8A20-B061FB3688E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F78D6E4-9A8B-44F9-8A20-B061FB3688E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F78D6E4-9A8B-44F9-8A20-B061FB3688E5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
