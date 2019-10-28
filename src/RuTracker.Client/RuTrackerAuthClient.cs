@@ -21,7 +21,7 @@ namespace RuTracker.Client
             };
             _httpClient = new HttpClient(httpClientHandler)
             {
-                DefaultRequestHeaders = { { "User-Agent", "curl/7.64.1" } }
+                DefaultRequestHeaders = { { "User-Agent", "RuTracker.Client/0.1.1" } }
             };
         }
         public void Dispose() => _httpClient.Dispose();
