@@ -1,6 +1,6 @@
 # RuTracker.Client
 
-[![NuGet version](https://badge.fury.io/nu/RuTracker.Client.svg)](https://www.nuget.org/packages/RuRracker.Client)
+[![NuGet version](https://badge.fury.io/nu/RuTracker.Client.svg)](https://www.nuget.org/packages/RuTracker.Client)
 
 ## Quick start
 
