@@ -84,15 +84,5 @@ namespace RuTracker.Client
             await stream.CopyToAsync(ms, defaultBufferSize, ct).ConfigureAwait(false);
             return ms.ToArray();
         }
-
-        public async Task Logout(CancellationToken ct = default)
-        {
-            var req = ApiUtil.CreatePostReq(
-                url: "/login.php",
-                session: _session,
-                ("logout", "1")
-            );
-            await _httpClient.SendAsync(req, ct).ConfigureAwait(false);
-        }
     }
 }
