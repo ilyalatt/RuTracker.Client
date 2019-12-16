@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RuTracker.Client.Model.Search.Response
 {
-    public sealed class Topic
+    public sealed class TopicBriefInfo
     {
         public readonly int Id;
         public readonly string Title;
@@ -17,7 +17,7 @@ namespace RuTracker.Client.Model.Search.Response
         public readonly int DownloadsCount;
         public readonly DateTime CreatedAt;
 
-        public Topic(int id, string title, TopicStatus topicStatus, Category category, IReadOnlyList<string> tags, User author, long sizeInBytes, int seedsCount, int leechsCount, int downloadsCount, DateTime createdAt)
+        public TopicBriefInfo(int id, string title, TopicStatus topicStatus, Category category, IReadOnlyList<string> tags, User author, long sizeInBytes, int seedsCount, int leechsCount, int downloadsCount, DateTime createdAt)
         {
             Id = id;
             Title = title;

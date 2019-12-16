@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BencodeNET.Torrents;
+using RuTracker.Client.Model;
 using RuTracker.Client.Model.Exceptions;
 using RuTracker.Client.Model.Search.Request;
 using RuTracker.Client.Model.Search.Response;
@@ -41,6 +43,17 @@ namespace RuTracker.Client.Playground
             }
         }
 
+        static async Task<List<Category>> GetAudioCategories(RuTrackerClient client)
+        {
+            var categories = await client.GetCategories();
+            return categories
+                .Where(x =>
+                    x.Path[0].EndsWith("музыка", StringComparison.OrdinalIgnoreCase) ||
+                    x.Path[0] == "Hi-Res форматы, оцифровки"
+                )
+                .ToList();
+        }
+
         static async Task Main()
         {
             using var client = await Login();
@@ -54,10 +67,15 @@ namespace RuTracker.Client.Playground
             var resp = await client.Search(req);
             Console.WriteLine($"Found {resp.Found} topics");
             PrintSearchResult(resp);
-
+            
             // Download torrent
             // var torrentBytes = await client.GetTorrent(resp.Topics.First().Id);
             // ParseTorrent(torrentBytes);
+            
+            // Get a magnet link of the first topic
+            // var topicId = resp.Topics.First().Id;
+            // var topic = await client.GetTopic(topicId);
+            // Console.WriteLine(topic.MagnetLink);
 
             // Get all other pages
             var nextPage = resp.NextPage;

@@ -8,9 +8,9 @@ namespace RuTracker.Client.Model.Search.Response
         public readonly int Found;
         public readonly PaginatedSearchRequest? NextPage;
         public readonly IReadOnlyList<Category> AllCategories;
-        public readonly IReadOnlyList<Topic> Topics;
+        public readonly IReadOnlyList<TopicBriefInfo> Topics;
 
-        public SearchResult(int found, PaginatedSearchRequest? nextPage, IReadOnlyList<Category> allCategories, IReadOnlyList<Topic> topics)
+        public SearchResult(int found, PaginatedSearchRequest? nextPage, IReadOnlyList<Category> allCategories, IReadOnlyList<TopicBriefInfo> topics)
         {
             Found = found;
             NextPage = nextPage;

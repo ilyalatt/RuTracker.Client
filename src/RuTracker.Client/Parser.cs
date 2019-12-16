@@ -8,6 +8,7 @@ using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using RuTracker.Client.Model;
 using RuTracker.Client.Model.Exceptions;
+using RuTracker.Client.Model.GetTopic;
 using RuTracker.Client.Model.Search.Request;
 using RuTracker.Client.Model.Search.Response;
 
@@ -118,7 +119,7 @@ namespace RuTracker.Client
             var categories = ParseCategories(html);
             var categoryMap = categories.ToDictionary(x => x.Id);
 
-            Topic ParseTopic(IElement elm)
+            TopicBriefInfo ParseTopicBriefInfo(IElement elm)
             {
                 var id = int.Parse(elm.Id.Split('-').Last());
 
@@ -172,7 +173,7 @@ namespace RuTracker.Client
                 var format = createdDateStr.Contains(' ') ? "d-MM-yy hh:mm" : "d-MM-yy";
                 var createdAt = DateTime.ParseExact(createdDateStr, format, CultureInfo.InvariantCulture);
 
-                return new Topic(
+                return new TopicBriefInfo(
                     id,
                     title,
                     status,
@@ -188,7 +189,7 @@ namespace RuTracker.Client
             }
 
             var table = doc.QuerySelector("#search-results table tbody");
-            var topics = table.QuerySelectorAll("tr").Select(ParseTopic).ToList();
+            var topics = table.QuerySelectorAll("tr").Select(ParseTopicBriefInfo).ToList();
 
             var foundRegex = new Regex(@"Результатов поиска: (\d+)");
             var found = int.Parse(foundRegex.Match(html).Groups[1].Value);
@@ -211,6 +212,19 @@ namespace RuTracker.Client
                 nextPage,
                 categories,
                 topics
+            );
+        }
+
+        public static Topic ParseTopic(string html)
+        {
+            EnsureSessionIsNotStaled(html);
+            var doc = _htmlParser.ParseDocument(html);
+
+            var magnetLinkElm = (IHtmlAnchorElement) doc.QuerySelector("a.magnet-link-1");
+            var magnetLink = magnetLinkElm.Href;
+            
+            return new Topic(
+                magnetLink
             );
         }
     }
