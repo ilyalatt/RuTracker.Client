@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RuTracker.Client.Model;
 using RuTracker.Client.Model.Exceptions;
+using RuTracker.Client.Model.GetFileTree;
 using RuTracker.Client.Model.GetTopic;
 using RuTracker.Client.Model.Search.Request;
 using RuTracker.Client.Model.Search.Response;
@@ -74,6 +75,18 @@ namespace RuTracker.Client
             var resp = await _httpClient.SendAsync(httpReq).ConfigureAwait(false);
             var html = await ApiUtil.ReadResponseContent(resp).ConfigureAwait(false);
             return Parser.ParseTopic(html);
+        }
+
+        public async Task<TorrentDirectoryInfo> GetFileTree(int topicId)
+        {
+            var httpReq = ApiUtil.CreatePostReq(
+                url: $"/forum/viewtorrent.php",
+                session: _session,
+                ("t", topicId.ToString())
+            );
+            var resp = await _httpClient.SendAsync(httpReq).ConfigureAwait(false);
+            var html = await ApiUtil.ReadResponseContent(resp).ConfigureAwait(false);
+            return FileTreeParser.Parse(html);
         }
 
         public async Task<byte[]> GetTorrent(int topicId, CancellationToken ct = default)
