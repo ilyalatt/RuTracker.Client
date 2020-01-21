@@ -188,11 +188,11 @@ namespace RuTracker.Client
                 );
             }
 
-            var table = doc.QuerySelector("#search-results table tbody");
-            var topics = table.QuerySelectorAll("tr").Select(ParseTopicBriefInfo).ToList();
-
             var foundRegex = new Regex(@"Результатов поиска: (\d+)");
             var found = int.Parse(foundRegex.Match(html).Groups[1].Value);
+            
+            var table = doc.QuerySelector("#search-results table tbody");
+            var topics = found == 0 ? new List<TopicBriefInfo>() : table.QuerySelectorAll("tr").Select(ParseTopicBriefInfo).ToList();
 
             PaginatedSearchRequest? GetNextPage()
             {
