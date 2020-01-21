@@ -16,7 +16,7 @@ namespace RuTracker.Client
 {
     static class Parser
     {
-        static readonly HtmlParser _htmlParser = new HtmlParser();
+        static readonly HtmlParser HtmlParser = new HtmlParser();
 
         static void EnsureAuthorized(IHtmlDocument doc)
         {
@@ -36,7 +36,7 @@ namespace RuTracker.Client
 
         public static IReadOnlyList<Category> ParseCategories(string html)
         {
-            var doc = _htmlParser.ParseDocument(html);
+            var doc = HtmlParser.ParseDocument(html);
             EnsureAuthorized(doc);
 
             var categories = new List<Category>();
@@ -114,7 +114,7 @@ namespace RuTracker.Client
         public static SearchResult ParseSearchResult(string html)
         {
             EnsureSessionIsNotStaled(html);
-            var doc = _htmlParser.ParseDocument(html);
+            var doc = HtmlParser.ParseDocument(html);
 
             var categories = ParseCategories(html);
             var categoryMap = categories.ToDictionary(x => x.Id);
@@ -218,7 +218,7 @@ namespace RuTracker.Client
         public static Topic ParseTopic(string html)
         {
             EnsureSessionIsNotStaled(html);
-            var doc = _htmlParser.ParseDocument(html);
+            var doc = HtmlParser.ParseDocument(html);
 
             var magnetLinkElm = (IHtmlAnchorElement) doc.QuerySelector("a.magnet-link-1");
             var magnetLink = magnetLinkElm.Href;
