@@ -215,15 +215,20 @@ namespace RuTracker.Client
             );
         }
 
-        public static Topic ParseTopic(string html)
+        public static Topic? ParseTorrentTopic(string html)
         {
             EnsureSessionIsNotStaled(html);
             var doc = HtmlParser.ParseDocument(html);
 
-            var magnetLinkElm = (IHtmlAnchorElement) doc.QuerySelector("a.magnet-link-1");
-            var magnetLink = magnetLinkElm.Href;
+            var postHtml = doc.QuerySelector(".post_body")?.InnerHtml;
+            if (postHtml == null) return null;
+            
+            var magnetLinkElm = (IHtmlAnchorElement?) doc.QuerySelector("a[href^=\"magnet\"]");
+            var magnetLink = magnetLinkElm?.Href;
+            if (magnetLink == null) return null;
             
             return new Topic(
+                postHtml,
                 magnetLink
             );
         }

@@ -66,7 +66,7 @@ namespace RuTracker.Client
             return Parser.ParseSearchResult(html);
         }
 
-        public async Task<Topic> GetTopic(int topicId)
+        public async Task<Topic?> GetTorrentTopic(int topicId)
         {
             var httpReq = ApiUtil.CreateGetReq(
                 url: $"/forum/viewtopic.php?t={topicId}",
@@ -74,7 +74,7 @@ namespace RuTracker.Client
             );
             var resp = await _httpClient.SendAsync(httpReq).ConfigureAwait(false);
             var html = await ApiUtil.ReadResponseContent(resp).ConfigureAwait(false);
-            return Parser.ParseTopic(html);
+            return Parser.ParseTorrentTopic(html);
         }
 
         public async Task<TorrentDirectoryInfo> GetFileTree(int topicId)
