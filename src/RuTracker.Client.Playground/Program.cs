@@ -15,8 +15,8 @@ namespace RuTracker.Client.Playground
     {
         static async Task<RuTrackerClient> Login()
         {
-            const string login = "LOGIN";
-            const string password = "PASSWORD";
+            const string login = "cyberpunk777";
+            const string password = "cyberpunk";
             var authClient = new RuTrackerAuthClient();
             var session = await authClient.Login(login, password);
             if (session == null)
