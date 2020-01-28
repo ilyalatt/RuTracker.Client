@@ -62,8 +62,8 @@ namespace RuTracker.Client.Playground
 
             var getForumTopicsRequest = new GetForumTopicsRequest(
                 forumId: forum.Id,
-                getForumTopicsSortBy: GetForumTopicsSortBy.Registered,
-                getForumsTopicsSortDirection: GetForumsTopicsSortDirection.Ascending); 
+                sortBy: GetForumTopicsSortBy.Registered,
+                sortDirection: GetForumsTopicsSortDirection.Ascending); 
             var firstPage = await client.GetForumTopics(getForumTopicsRequest);
             for (var i = 2; i <= Math.Min(5, firstPage.PagesCount); i++)
             {
@@ -76,8 +76,8 @@ namespace RuTracker.Client.Playground
             using var client = await Login();
             var req = new SearchRequest(
                 title: "Виктор Цой FLAC",
-                searchTopicSortBy: SearchTopicSortBy.Downloads,
-                searchTopicSortDirection: SearchTopicSortDirection.Descending
+                sortBy: SearchTopicSortBy.Downloads,
+                sortDirection: SearchTopicSortDirection.Descending
             );
 
             // Get first page of results

@@ -3,26 +3,26 @@ namespace RuTracker.Client.Model.GetForumTopics.Request
     public sealed class GetForumTopicsRequest
     {
         public readonly int ForumId;
-        public readonly GetForumTopicsSortBy GetForumTopicsSortBy;
-        public readonly GetForumsTopicsSortDirection GetForumsTopicsSortDirection;
+        public readonly GetForumTopicsSortBy SortBy;
+        public readonly GetForumsTopicsSortDirection SortDirection;
         public readonly int Page;
 
         public GetForumTopicsRequest(
             int forumId,
-            GetForumTopicsSortBy getForumTopicsSortBy = GetForumTopicsSortBy.LastMessage,
-            GetForumsTopicsSortDirection getForumsTopicsSortDirection = GetForumsTopicsSortDirection.Descending,
+            GetForumTopicsSortBy sortBy = GetForumTopicsSortBy.LastMessage,
+            GetForumsTopicsSortDirection sortDirection = GetForumsTopicsSortDirection.Descending,
             int page = 1
         ) {
             ForumId = forumId;
-            GetForumTopicsSortBy = getForumTopicsSortBy;
-            GetForumsTopicsSortDirection = getForumsTopicsSortDirection;
+            SortBy = sortBy;
+            SortDirection = sortDirection;
             Page = page;
         }
 
         public GetForumTopicsRequest WithPage(int page) => new GetForumTopicsRequest(
             ForumId,
-            GetForumTopicsSortBy,
-            GetForumsTopicsSortDirection,
+            SortBy,
+            SortDirection,
             page
         );
     }

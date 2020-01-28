@@ -39,8 +39,8 @@ namespace RuTracker.Client
                 ("pn", req.Author),
                 ("nm", req.Title),
                 ("tm", "-1"),
-                ("o", ((int) req.SearchTopicSortBy).ToString()),
-                ("s", ((int) req.SearchTopicSortDirection).ToString())
+                ("o", ((int) req.SortBy).ToString()),
+                ("s", ((int) req.SortDirection).ToString())
             );
             var resp = await _httpClient.SendAsync(httpReq, ct).ConfigureAwait(false);
             var html = await ApiUtil.ReadResponseContent(resp).ConfigureAwait(false);
@@ -99,8 +99,8 @@ namespace RuTracker.Client
             var queryParams = new[]
             {
                 ("f", req.ForumId),
-                ("sort", (int) req.GetForumTopicsSortBy),
-                ("order", (int) req.GetForumsTopicsSortDirection),
+                ("sort", (int) req.SortBy),
+                ("order", (int) req.SortDirection),
                 ("start", (req.Page - 1) * 50) // can use multiples of 50 only
             };
             var queryStr = string.Join("&", queryParams.Where(x => x.Item2 != 0).Select(x => $"{x.Item1}={x.Item2}"));
