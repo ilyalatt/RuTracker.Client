@@ -1,6 +1,6 @@
 namespace RuTracker.Client.Model.SearchTopics.Request
 {
-    public enum SearchTopicSortBy
+    public enum SearchTopicsSortBy
     {
         Registered = 1,
         Title = 2,

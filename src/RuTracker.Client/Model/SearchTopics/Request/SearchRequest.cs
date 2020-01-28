@@ -7,15 +7,15 @@ namespace RuTracker.Client.Model.SearchTopics.Request
         public readonly string Title;
         public readonly string Author;
         public readonly IReadOnlyList<int> Forums;
-        public readonly SearchTopicSortBy SortBy;
-        public readonly SearchTopicSortDirection SortDirection;
+        public readonly SearchTopicsSortBy SortBy;
+        public readonly SearchTopicsSortDirection SortDirection;
 
         public SearchRequest(
             string title,
             string author = "",
             IReadOnlyList<int>? categories = null,
-            SearchTopicSortBy sortBy = SearchTopicSortBy.Registered,
-            SearchTopicSortDirection sortDirection = SearchTopicSortDirection.Descending
+            SearchTopicsSortBy sortBy = SearchTopicsSortBy.Registered,
+            SearchTopicsSortDirection sortDirection = SearchTopicsSortDirection.Descending
         )
         {
             Title = title;

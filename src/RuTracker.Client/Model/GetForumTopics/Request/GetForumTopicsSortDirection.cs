@@ -1,6 +1,6 @@
 namespace RuTracker.Client.Model.GetForumTopics.Request
 {
-    public enum GetForumsTopicsSortDirection
+    public enum GetForumTopicsSortDirection
     {
         Ascending = 1,
         Descending = 0

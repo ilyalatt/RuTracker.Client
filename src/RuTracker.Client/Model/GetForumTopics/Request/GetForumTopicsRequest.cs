@@ -4,13 +4,13 @@ namespace RuTracker.Client.Model.GetForumTopics.Request
     {
         public readonly int ForumId;
         public readonly GetForumTopicsSortBy SortBy;
-        public readonly GetForumsTopicsSortDirection SortDirection;
+        public readonly GetForumTopicsSortDirection SortDirection;
         public readonly int Page;
 
         public GetForumTopicsRequest(
             int forumId,
             GetForumTopicsSortBy sortBy = GetForumTopicsSortBy.LastMessage,
-            GetForumsTopicsSortDirection sortDirection = GetForumsTopicsSortDirection.Descending,
+            GetForumTopicsSortDirection sortDirection = GetForumTopicsSortDirection.Descending,
             int page = 1
         ) {
             ForumId = forumId;
