@@ -21,7 +21,7 @@ var res = await client.SearchTopics(new SearchTopicsRequest(
     sortDirection: SearchTopicsSortDirection.Descending
 ));
 var topic = res.Topics.First();
-var torrentBytes = await client.GetTorrentTorrent(topic.Id);
+var torrentBytes = await client.GetTopicTorrent(topic.Id);
 ```
 
 For the complete example check out [Playground](https://github.com/ilyalatt/RuTracker.Client/blob/master/src/RuTracker.Client.Playground/Program.cs).
