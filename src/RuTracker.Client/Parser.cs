@@ -8,9 +8,11 @@ using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using RuTracker.Client.Model;
 using RuTracker.Client.Model.Exceptions;
+using RuTracker.Client.Model.GetForumTopics.Response;
 using RuTracker.Client.Model.GetTopic;
-using RuTracker.Client.Model.Search.Request;
-using RuTracker.Client.Model.Search.Response;
+using RuTracker.Client.Model.GetTopic.Response;
+using RuTracker.Client.Model.SearchTopics.Request;
+using RuTracker.Client.Model.SearchTopics.Response;
 
 namespace RuTracker.Client
 {
@@ -34,15 +36,15 @@ namespace RuTracker.Client
             }
         }
 
-        public static IReadOnlyList<Category> ParseCategories(string html)
+        public static IReadOnlyList<Forum> ParseForums(string html)
         {
             var doc = HtmlParser.ParseDocument(html);
             EnsureAuthorized(doc);
 
-            var categories = new List<Category>();
+            var forums = new List<Forum>();
             var recPath = new Stack<string>();
 
-            string? Text(IElement elm)
+            static string? Text(IElement elm)
             {
                 var text = (elm as IHtmlOptionsGroupElement)?.Label.Trim();
                 text ??= (elm as IHtmlOptionElement)?.Label.Trim();
@@ -61,7 +63,7 @@ namespace RuTracker.Client
                 {
                     var id = int.Parse(elm.GetAttribute("value"));
                     var path = recPath.Reverse().ToList();
-                    categories.Add(new Category(id, path));
+                    forums.Add(new Forum(id, path));
                 }
 
                 var isOptGroupAdded = false;
@@ -82,7 +84,7 @@ namespace RuTracker.Client
             }
             Traverse(doc.QuerySelector("#fs-main"));
 
-            return categories;
+            return forums;
         }
 
         static readonly Dictionary<string, TopicStatus> StatusMapping = new Dictionary<string, TopicStatus>
@@ -111,24 +113,45 @@ namespace RuTracker.Client
             { "Дек", "12" },
         };
 
-        public static SearchResult ParseSearchResult(string html)
+        static User? ParseUserLink(IHtmlAnchorElement? elm)
+        {
+            if (elm == null) return null;
+            
+            var title = elm.Text();
+            var id = int.Parse(elm.Href.Split('=').Last());
+            return id == -1 ? null : new User(id, title);
+        }
+
+        static DateTime ParseShortTimestamp(string s)
+        {
+            var createdDateStr = string.Join(" ", s
+                .Split(new[] {' ', '\t', '\n'}, StringSplitOptions.RemoveEmptyEntries)
+            );
+            var splCreatedDateStr = createdDateStr.Split('-');
+            splCreatedDateStr[1] = MonthToNumMap[splCreatedDateStr[1]];
+            createdDateStr = string.Join("-", splCreatedDateStr);
+            var format = createdDateStr.Contains(' ') ? "d-MM-yy HH:mm" : "d-MM-yy";
+            return DateTime.ParseExact(createdDateStr, format, CultureInfo.InvariantCulture);
+        }
+
+        public static SearchResult ParseSearchTopicsResponse(string html)
         {
             EnsureSessionIsNotStaled(html);
             var doc = HtmlParser.ParseDocument(html);
 
-            var categories = ParseCategories(html);
-            var categoryMap = categories.ToDictionary(x => x.Id);
+            var forums = ParseForums(html);
+            var forumMap = forums.ToDictionary(x => x.Id);
 
-            TopicBriefInfo ParseTopicBriefInfo(IElement elm)
+            SearchTopicInfo ParseTopicBriefInfo(IElement elm)
             {
                 var id = int.Parse(elm.Id.Split('-').Last());
 
                 var statusIconText = elm.QuerySelector(".tor-icon").Text();
                 var status = StatusMapping.TryGetValue(statusIconText, out var res) ? res : TopicStatus.Unknown;
 
-                var categoryUrl = ((IHtmlAnchorElement) elm.QuerySelector(".f-name a")).Href;
-                var categoryId = int.Parse(categoryUrl.Split('=').Last());
-                var category = categoryMap[categoryId];
+                var forumUrl = ((IHtmlAnchorElement) elm.QuerySelector(".f-name a")).Href;
+                var forumId = int.Parse(forumUrl.Split('=').Last());
+                var forum = forumMap[forumId];
 
                 var titleElm = elm.QuerySelector(".t-title");
                 var title = titleElm.QuerySelector("a").Text().Trim();
@@ -145,10 +168,8 @@ namespace RuTracker.Client
                     title = title.Substring(tagsStr.Length).Trim();
                 }
 
-                var authorElm = (IHtmlAnchorElement) elm.QuerySelector(".u-name a");
-                var authorTitle = authorElm.Text();
-                var authorId = int.Parse(authorElm.Href.Split('=').Last());
-                var author = new User(authorId, authorTitle);
+                var authorElm = (IHtmlAnchorElement?) elm.QuerySelector(".u-name a");
+                var author = ParseUserLink(authorElm);
 
                 var sizeElm = elm.QuerySelector(".tor-size");
                 var sizeInBytes = long.Parse(sizeElm.GetAttribute("data-ts_text"));
@@ -158,31 +179,24 @@ namespace RuTracker.Client
                 var seedsCount = Math.Max(0, seedCountValue); // TODO: add info about past (like -4 days)
 
                 var leechCountElm = elm.QuerySelector(".leechmed");
-                var leechsCount = int.Parse(leechCountElm.TextContent);
+                var leechesCount = int.Parse(leechCountElm.TextContent);
 
                 var downloadsCountElm = leechCountElm.NextElementSibling;
                 var downloadsCount = int.Parse(downloadsCountElm.TextContent);
 
                 var createdDateElm = downloadsCountElm.NextElementSibling;
-                var createdDateStr = string.Join(" ", createdDateElm.TextContent
-                    .Split(new[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                );
-                var splCreatedDateStr = createdDateStr.Split('-');
-                splCreatedDateStr[1] = MonthToNumMap[splCreatedDateStr[1]];
-                createdDateStr = string.Join("-", splCreatedDateStr);
-                var format = createdDateStr.Contains(' ') ? "d-MM-yy hh:mm" : "d-MM-yy";
-                var createdAt = DateTime.ParseExact(createdDateStr, format, CultureInfo.InvariantCulture);
+                var createdAt = ParseShortTimestamp(createdDateElm.TextContent);
 
-                return new TopicBriefInfo(
+                return new SearchTopicInfo(
                     id,
                     title,
                     status,
-                    category,
+                    forum,
                     tags,
                     author,
                     sizeInBytes,
                     seedsCount,
-                    leechsCount,
+                    leechesCount,
                     downloadsCount,
                     createdAt
                 );
@@ -192,7 +206,7 @@ namespace RuTracker.Client
             var found = int.Parse(foundRegex.Match(html).Groups[1].Value);
             
             var table = doc.QuerySelector("#search-results table tbody");
-            var topics = found == 0 ? new List<TopicBriefInfo>() : table.QuerySelectorAll("tr").Select(ParseTopicBriefInfo).ToList();
+            var topics = found == 0 ? new List<SearchTopicInfo>() : table.QuerySelectorAll("tr").Select(ParseTopicBriefInfo).ToList();
 
             PaginatedSearchRequest? GetNextPage()
             {
@@ -210,7 +224,7 @@ namespace RuTracker.Client
             return new SearchResult(
                 found,
                 nextPage,
-                categories,
+                forums,
                 topics
             );
         }
@@ -230,6 +244,78 @@ namespace RuTracker.Client
             return new Topic(
                 postHtml,
                 magnetLink
+            );
+        }
+
+        public static GetForumTopicsResponse ParseForumTopicsResponse(string html)
+        {
+            EnsureSessionIsNotStaled(html);
+            var doc = HtmlParser.ParseDocument(html);
+
+            var tableElm = doc.QuerySelector("table.forum");
+            if (tableElm == null) return new GetForumTopicsResponse(
+                currentPage: 0,
+                pagesCount: 0,
+                topics: new ForumTopicInfo[0]
+            );
+            var rowElms = tableElm.QuerySelectorAll("tr").ToList();
+            var topicSeparatorElmIndex = rowElms.FindLastIndex(x => x.FirstElementChild.ClassList.Contains("topicSep"));
+            var topicRows = rowElms.Skip(topicSeparatorElmIndex + 1).Where(x => x.ClassList.Contains("hl-tr"));
+
+            static ForumTopicInfo ParseTopic(IElement elm)
+            {
+                var id = int.Parse(elm.Id.Split('-').Last());
+
+                var titleSection = elm.QuerySelector("td.vf-col-t-title");
+                var title = titleSection.QuerySelector("a.torTopic").Text();
+                var statusIconText = titleSection.QuerySelector(".tor-icon").Text();
+                var topicStatus = StatusMapping.TryGetValue(statusIconText, out var res) ? res : TopicStatus.Unknown;
+                var topicAuthorElm = (IHtmlAnchorElement?) titleSection.QuerySelector("a.topicAuthor");
+                var author = ParseUserLink(topicAuthorElm);
+
+                var torrentSection = elm.QuerySelector("td.vf-col-tor");
+                var seedsCount = int.Parse(torrentSection.QuerySelector("span.seedmed").Text());
+                var leechesCount = int.Parse(torrentSection.QuerySelector("span.leechmed").Text());
+                var size = torrentSection.QuerySelector("a.f-dl").Text();
+
+                var repliesSection = elm.QuerySelector(".vf-col-replies");
+                var repliesCount = int.Parse(repliesSection.FirstElementChild.Text());
+                var downloadsCount = int.Parse(repliesSection.LastElementChild.Text().Replace(",", ""));
+
+                var lastPostSection = elm.QuerySelector(".vf-col-last-post");
+                var lastMessageAtStr = lastPostSection.FirstElementChild.Text();
+                var lastMessageAt = DateTime.ParseExact(lastMessageAtStr, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                
+                var lastMessageUser = ParseUserLink((IHtmlAnchorElement?) lastPostSection.QuerySelector("a[href^=profile]"));
+
+                return new ForumTopicInfo(
+                    id,
+                    title,
+                    topicStatus,
+                    author,
+                    size,
+                    seedsCount,
+                    leechesCount,
+                    repliesCount,
+                    downloadsCount,
+                    lastMessageAt,
+                    lastMessageUser
+                );
+            }
+
+            var topics = topicRows.Select(ParseTopic).ToList();
+
+            var paginationElm = doc.QuerySelector("#pagination");
+            var paginationLabelText = paginationElm.QuerySelector("p").Text();
+            var paginationRegex = new Regex(@"Страница (?<currentPage>\d+) из (?<pagesCount>\d+)");
+            var paginationMatch = paginationRegex.Match(paginationLabelText);
+            var currentPage = int.Parse(paginationMatch.Groups["currentPage"].Value);
+            var pagesCount = int.Parse(paginationMatch.Groups["pagesCount"].Value);
+
+            return new GetForumTopicsResponse(
+                currentPage: currentPage,
+                pagesCount: pagesCount,
+                topics: topics
             );
         }
     }

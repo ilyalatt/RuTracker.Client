@@ -1,4 +1,4 @@
-namespace RuTracker.Client.Model.Search.Response
+namespace RuTracker.Client.Model
 {
     public enum TopicStatus
     {

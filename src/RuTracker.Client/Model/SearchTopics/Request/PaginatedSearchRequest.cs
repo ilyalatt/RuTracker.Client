@@ -1,4 +1,4 @@
-namespace RuTracker.Client.Model.Search.Request
+namespace RuTracker.Client.Model.SearchTopics.Request
 {
     public sealed class PaginatedSearchRequest
     {

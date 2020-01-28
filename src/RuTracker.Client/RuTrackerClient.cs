@@ -1,15 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using RuTracker.Client.Model;
 using RuTracker.Client.Model.Exceptions;
-using RuTracker.Client.Model.GetFileTree;
 using RuTracker.Client.Model.GetTopic;
-using RuTracker.Client.Model.Search.Request;
-using RuTracker.Client.Model.Search.Response;
+using RuTracker.Client.Model.GetForumTopics.Request;
+using RuTracker.Client.Model.GetForumTopics.Response;
+using RuTracker.Client.Model.GetTopic.Response;
+using RuTracker.Client.Model.GetTopicFileTree.Response;
+using RuTracker.Client.Model.SearchTopics.Request;
+using RuTracker.Client.Model.SearchTopics.Response;
 
 namespace RuTracker.Client
 {
@@ -30,32 +35,32 @@ namespace RuTracker.Client
             var httpReq = ApiUtil.CreatePostReq(
                 url: "/forum/tracker.php",
                 session: _session,
-                ("f", string.Join(",", req.Categories)),
+                ("f", string.Join(",", req.Forums)),
                 ("pn", req.Author),
                 ("nm", req.Title),
                 ("tm", "-1"),
-                ("o", ((int) req.SortBy).ToString()),
-                ("s", ((int) req.SortDirection).ToString())
+                ("o", ((int) req.SearchTopicSortBy).ToString()),
+                ("s", ((int) req.SearchTopicSortDirection).ToString())
             );
             var resp = await _httpClient.SendAsync(httpReq, ct).ConfigureAwait(false);
             var html = await ApiUtil.ReadResponseContent(resp).ConfigureAwait(false);
             return html;
         }
 
-        public async Task<IReadOnlyList<Category>> GetCategories(CancellationToken ct = default)
+        public async Task<IReadOnlyList<Forum>> GetForums(CancellationToken ct = default)
         {
             var req = new SearchRequest("");
             var html = await SearchImpl(req, ct).ConfigureAwait(false);
-            return Parser.ParseCategories(html);
+            return Parser.ParseForums(html);
         }
 
-        public async Task<SearchResult> Search(SearchRequest req, CancellationToken ct = default)
+        public async Task<SearchResult> SearchTopics(SearchRequest req, CancellationToken ct = default)
         {
             var html = await SearchImpl(req, ct).ConfigureAwait(false);
-            return Parser.ParseSearchResult(html);
+            return Parser.ParseSearchTopicsResponse(html);
         }
 
-        public async Task<SearchResult> Search(PaginatedSearchRequest req, CancellationToken ct = default)
+        public async Task<SearchResult> SearchTopics(PaginatedSearchRequest req, CancellationToken ct = default)
         {
             var httpReq = ApiUtil.CreateGetReq(
                 url: $"/forum/tracker.php?search_id={req.SearchId}&start={req.Offset}",
@@ -63,7 +68,7 @@ namespace RuTracker.Client
             );
             var resp = await _httpClient.SendAsync(httpReq, ct).ConfigureAwait(false);
             var html = await ApiUtil.ReadResponseContent(resp).ConfigureAwait(false);
-            return Parser.ParseSearchResult(html);
+            return Parser.ParseSearchTopicsResponse(html);
         }
 
         public async Task<Topic?> GetTorrentTopic(int topicId)
@@ -77,7 +82,7 @@ namespace RuTracker.Client
             return Parser.ParseTorrentTopic(html);
         }
 
-        public async Task<TorrentDirectoryInfo> GetFileTree(int topicId)
+        public async Task<TorrentDirectoryInfo> GetTopicFileTree(int topicId)
         {
             var httpReq = ApiUtil.CreatePostReq(
                 url: $"/forum/viewtorrent.php",
@@ -88,8 +93,31 @@ namespace RuTracker.Client
             var html = await ApiUtil.ReadResponseContent(resp).ConfigureAwait(false);
             return FileTreeParser.Parse(html);
         }
+        
+        public async Task<GetForumTopicsResponse> GetForumTopics(GetForumTopicsRequest req, CancellationToken ct = default)
+        {
+            var queryParams = new[]
+            {
+                ("f", req.ForumId),
+                ("sort", (int) req.GetForumTopicsSortBy),
+                ("order", (int) req.GetForumsTopicsSortDirection),
+                ("start", (req.Page - 1) * 50) // can use multiples of 50 only
+            };
+            var queryStr = string.Join("&", queryParams.Where(x => x.Item2 != 0).Select(x => $"{x.Item1}={x.Item2}"));
+            var httpReq = ApiUtil.CreateGetReq(
+                url: $"/forum/viewforum.php?{queryStr}",
+                session: _session
+            );
+            var resp = await _httpClient.SendAsync(httpReq, ct).ConfigureAwait(false);
+            if (resp.StatusCode == HttpStatusCode.Redirect)
+            {
+                throw new Exception("Looks like there is an unexpected redirect in method GetForumTopics.");
+            }
+            var html = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return Parser.ParseForumTopicsResponse(html);
+        }
 
-        public async Task<byte[]> GetTorrent(int topicId, CancellationToken ct = default)
+        public async Task<byte[]> GetTopicTorrent(int topicId, CancellationToken ct = default)
         {
             var httpReq = ApiUtil.CreateGetReq(
                 url: $"/forum/dl.php?t={topicId}",

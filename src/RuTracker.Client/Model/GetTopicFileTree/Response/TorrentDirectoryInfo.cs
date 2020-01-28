@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RuTracker.Client.Model.GetFileTree
+namespace RuTracker.Client.Model.GetTopicFileTree.Response
 {
     public sealed class TorrentDirectoryInfo
     {

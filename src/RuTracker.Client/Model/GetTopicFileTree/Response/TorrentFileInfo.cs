@@ -1,4 +1,4 @@
-namespace RuTracker.Client.Model.GetFileTree
+namespace RuTracker.Client.Model.GetTopicFileTree.Response
 {
     public sealed class TorrentFileInfo
     {

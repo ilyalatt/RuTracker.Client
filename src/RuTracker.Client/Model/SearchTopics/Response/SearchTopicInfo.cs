@@ -1,33 +1,33 @@
 using System;
 using System.Collections.Generic;
 
-namespace RuTracker.Client.Model.Search.Response
+namespace RuTracker.Client.Model.SearchTopics.Response
 {
-    public sealed class TopicBriefInfo
+    public sealed class SearchTopicInfo
     {
         public readonly int Id;
         public readonly string Title;
         public readonly TopicStatus TopicStatus;
-        public readonly Category Category;
+        public readonly Forum Forum;
         public readonly IReadOnlyList<string> Tags;
-        public readonly User Author;
+        public readonly User? Author;
         public readonly long SizeInBytes;
         public readonly int SeedsCount;
-        public readonly int LeechsCount;
+        public readonly int LeechesCount;
         public readonly int DownloadsCount;
         public readonly DateTime CreatedAt;
 
-        public TopicBriefInfo(int id, string title, TopicStatus topicStatus, Category category, IReadOnlyList<string> tags, User author, long sizeInBytes, int seedsCount, int leechsCount, int downloadsCount, DateTime createdAt)
+        public SearchTopicInfo(int id, string title, TopicStatus topicStatus, Forum forum, IReadOnlyList<string> tags, User? author, long sizeInBytes, int seedsCount, int leechesCount, int downloadsCount, DateTime createdAt)
         {
             Id = id;
             Title = title;
             TopicStatus = topicStatus;
-            Category = category;
+            Forum = forum;
             Tags = tags;
             Author = author;
             SizeInBytes = sizeInBytes;
             SeedsCount = seedsCount;
-            LeechsCount = leechsCount;
+            LeechesCount = leechesCount;
             DownloadsCount = downloadsCount;
             CreatedAt = createdAt;
         }

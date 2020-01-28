@@ -2,7 +2,7 @@ using System.Linq;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using RuTracker.Client.Model.Exceptions;
-using RuTracker.Client.Model.GetFileTree;
+using RuTracker.Client.Model.GetTopicFileTree.Response;
 
 namespace RuTracker.Client
 {
@@ -19,7 +19,7 @@ namespace RuTracker.Client
         static TorrentFileInfo ParseFile(IElement elm)
         {
             var (name, size) = ParseInfo(elm.FirstElementChild);
-            return new TorrentFileInfo(name, size.Value);
+            return new TorrentFileInfo(name, size!.Value);
         }
 
         static bool IsFile(IElement elm) => elm.ClassName == null;

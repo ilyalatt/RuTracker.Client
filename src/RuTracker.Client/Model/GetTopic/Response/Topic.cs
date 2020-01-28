@@ -1,4 +1,4 @@
-namespace RuTracker.Client.Model.GetTopic
+namespace RuTracker.Client.Model.GetTopic.Response
 {
     public sealed class Topic
     {
