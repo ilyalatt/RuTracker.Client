@@ -8,15 +8,15 @@ namespace RuTracker.Client.Model.GetForumTopics.Response
         public readonly string Title;
         public readonly TopicStatus TopicStatus;
         public readonly User? Author;
-        public readonly string Size;
-        public readonly int SeedsCount;
-        public readonly int LeechesCount;
+        public readonly string? Size;
+        public readonly int? SeedsCount;
+        public readonly int? LeechesCount;
         public readonly int RepliesCount;
-        public readonly int DownloadsCount;
+        public readonly int? DownloadsCount;
         public readonly DateTime LastMessageAt;
         public readonly User? LastMessageUser;
 
-        public ForumTopicInfo(int id, string title, TopicStatus topicStatus, User? author, string size, int seedsCount, int leechesCount, int repliesCount, int downloadsCount, DateTime lastMessageAt, User? lastMessageUser)
+        public ForumTopicInfo(int id, string title, TopicStatus topicStatus, User? author, string? size, int? seedsCount, int? leechesCount, int repliesCount, int? downloadsCount, DateTime lastMessageAt, User? lastMessageUser)
         {
             Id = id;
             Title = title;

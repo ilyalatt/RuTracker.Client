@@ -90,6 +90,7 @@ namespace RuTracker.Client
         static readonly Dictionary<string, TopicStatus> StatusMapping = new Dictionary<string, TopicStatus>
         {
             { "√", TopicStatus.Checked },
+            { "x", TopicStatus.Closed },
             { "∑", TopicStatus.Consumed },
             { "D", TopicStatus.Duplicate },
             { "#", TopicStatus.Suspicious },
@@ -247,6 +248,7 @@ namespace RuTracker.Client
             );
         }
 
+        // TODO: parse pinned forums
         public static GetForumTopicsResponse ParseForumTopicsResponse(string html)
         {
             EnsureSessionIsNotStaled(html);
@@ -262,25 +264,30 @@ namespace RuTracker.Client
             var topicSeparatorElmIndex = rowElms.FindLastIndex(x => x.FirstElementChild.ClassList.Contains("topicSep"));
             var topicRows = rowElms.Skip(topicSeparatorElmIndex + 1).Where(x => x.ClassList.Contains("hl-tr"));
 
-            static ForumTopicInfo ParseTopic(IElement elm)
+            static ForumTopicInfo? ParseTopic(IElement elm)
             {
                 var id = int.Parse(elm.Id.Split('-').Last());
 
                 var titleSection = elm.QuerySelector("td.vf-col-t-title");
-                var title = titleSection.QuerySelector("a.torTopic").Text();
-                var statusIconText = titleSection.QuerySelector(".tor-icon").Text();
-                var topicStatus = StatusMapping.TryGetValue(statusIconText, out var res) ? res : TopicStatus.Unknown;
+                var title = titleSection.QuerySelector("a").Text();
                 var topicAuthorElm = (IHtmlAnchorElement?) titleSection.QuerySelector("a.topicAuthor");
                 var author = ParseUserLink(topicAuthorElm);
+                // status can be not set!
+                var statusIconText = titleSection.QuerySelector(".tor-icon")?.Text();
+                var topicStatus = statusIconText != null && StatusMapping.TryGetValue(statusIconText, out var res) ? res : TopicStatus.Unknown;
 
                 var torrentSection = elm.QuerySelector("td.vf-col-tor");
-                var seedsCount = int.Parse(torrentSection.QuerySelector("span.seedmed").Text());
-                var leechesCount = int.Parse(torrentSection.QuerySelector("span.leechmed").Text());
-                var size = torrentSection.QuerySelector("a.f-dl").Text();
+                var seedsCountStr = torrentSection.QuerySelector("span.seedmed")?.Text();
+                var seedsCount = seedsCountStr == null ? (int?) null : int.Parse(seedsCountStr);
+                var leechesCountStr = torrentSection.QuerySelector("span.leechmed")?.Text();
+                var leechesCount = leechesCountStr == null ? (int?) null : int.Parse(leechesCountStr);
+                var size = torrentSection.QuerySelector("a.f-dl")?.Text();
 
                 var repliesSection = elm.QuerySelector(".vf-col-replies");
-                var repliesCount = int.Parse(repliesSection.FirstElementChild.Text());
-                var downloadsCount = int.Parse(repliesSection.LastElementChild.Text().Replace(",", ""));
+                var repliesCountElm = repliesSection.FirstElementChild;
+                var downloadsCountElm = repliesCountElm.NextElementSibling;
+                var repliesCount = int.Parse(repliesCountElm.Text());
+                var downloadsCount = downloadsCountElm == null ? (int?) null : int.Parse(downloadsCountElm.Text().Replace(",", ""));
 
                 var lastPostSection = elm.QuerySelector(".vf-col-last-post");
                 var lastMessageAtStr = lastPostSection.FirstElementChild.Text();
@@ -303,7 +310,7 @@ namespace RuTracker.Client
                 );
             }
 
-            var topics = topicRows.Select(ParseTopic).ToList();
+            var topics = topicRows.Select(ParseTopic).Where(x => x != null).Select(x => x!).ToList();
 
             var paginationElm = doc.QuerySelector("#pagination");
             var paginationLabelText = paginationElm.QuerySelector("p").Text();
