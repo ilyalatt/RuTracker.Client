@@ -269,7 +269,7 @@ namespace RuTracker.Client
                 var id = int.Parse(elm.Id.Split('-').Last());
 
                 var titleSection = elm.QuerySelector("td.vf-col-t-title");
-                var title = titleSection.QuerySelector("a").Text();
+                var title = titleSection.QuerySelector("a.tt-text").Text();
                 var topicAuthorElm = (IHtmlAnchorElement?) titleSection.QuerySelector("a.topicAuthor");
                 var author = ParseUserLink(topicAuthorElm);
                 // status can be not set!
