@@ -254,7 +254,7 @@ namespace RuTracker.Client
             EnsureSessionIsNotStaled(html);
             var doc = HtmlParser.ParseDocument(html);
 
-            var tableElm = doc.QuerySelector("table.forum");
+            var tableElm = doc.QuerySelector("table.vf-table.forum");
             if (tableElm == null) return new GetForumTopicsResponse(
                 currentPage: 0,
                 pagesCount: 0,
