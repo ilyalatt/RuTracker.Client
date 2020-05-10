@@ -9,7 +9,6 @@ using AngleSharp.Html.Parser;
 using RuTracker.Client.Model;
 using RuTracker.Client.Model.Exceptions;
 using RuTracker.Client.Model.GetForumTopics.Response;
-using RuTracker.Client.Model.GetTopic;
 using RuTracker.Client.Model.GetTopic.Response;
 using RuTracker.Client.Model.SearchTopics.Request;
 using RuTracker.Client.Model.SearchTopics.Response;
@@ -281,12 +280,13 @@ namespace RuTracker.Client
                 var seedsCount = seedsCountStr == null ? (int?) null : int.Parse(seedsCountStr);
                 var leechesCountStr = torrentSection.QuerySelector("span.leechmed")?.Text();
                 var leechesCount = leechesCountStr == null ? (int?) null : int.Parse(leechesCountStr);
-                var size = torrentSection.QuerySelector("a.f-dl")?.Text();
+                var sizeText = torrentSection.QuerySelector("a.f-dl")?.Text();
+                var size = sizeText == null ? null : ApproximateSize.Parse(sizeText.Replace('\u00A0', ' '));
 
                 var repliesSection = elm.QuerySelector(".vf-col-replies");
                 var repliesCountElm = repliesSection.FirstElementChild;
                 var downloadsCountElm = repliesCountElm.NextElementSibling;
-                var repliesCount = int.Parse(repliesCountElm.Text());
+                var repliesCount = int.Parse(repliesCountElm.Text().Replace(",", ""));
                 var downloadsCount = downloadsCountElm == null ? (int?) null : int.Parse(downloadsCountElm.Text().Replace(",", ""));
 
                 var lastPostSection = elm.QuerySelector(".vf-col-last-post");
@@ -312,12 +312,18 @@ namespace RuTracker.Client
 
             var topics = topicRows.Select(ParseTopic).Where(x => x != null).Select(x => x!).ToList();
 
+            static (int, int) ParsePagination(IElement paginationElm) {
+                var paginationLabelText = paginationElm.QuerySelector("p").Text();
+                var paginationRegex = new Regex(@"Страница (?<currentPage>\d+) из (?<pagesCount>\d+)");
+                var paginationMatch = paginationRegex.Match(paginationLabelText);
+                return (
+                    int.Parse(paginationMatch.Groups["currentPage"].Value),
+                    int.Parse(paginationMatch.Groups["pagesCount"].Value)
+                );
+            }
+            
             var paginationElm = doc.QuerySelector("#pagination");
-            var paginationLabelText = paginationElm.QuerySelector("p").Text();
-            var paginationRegex = new Regex(@"Страница (?<currentPage>\d+) из (?<pagesCount>\d+)");
-            var paginationMatch = paginationRegex.Match(paginationLabelText);
-            var currentPage = int.Parse(paginationMatch.Groups["currentPage"].Value);
-            var pagesCount = int.Parse(paginationMatch.Groups["pagesCount"].Value);
+            var (currentPage, pagesCount) = paginationElm == null ? (1, 1) : ParsePagination(paginationElm);
 
             return new GetForumTopicsResponse(
                 currentPage: currentPage,
