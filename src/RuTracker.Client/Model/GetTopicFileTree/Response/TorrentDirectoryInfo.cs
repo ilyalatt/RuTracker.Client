@@ -4,22 +4,13 @@ using System.Linq;
 
 namespace RuTracker.Client.Model.GetTopicFileTree.Response
 {
-    public sealed class TorrentDirectoryInfo
-    {
-        public readonly string Name;
-        public readonly long Size;
-        public readonly IReadOnlyList<TorrentDirectoryInfo> Directories;
-        public readonly IReadOnlyList<TorrentFileInfo> Files;
-
-        public TorrentDirectoryInfo(string name, long size, IReadOnlyList<TorrentDirectoryInfo> directories, IReadOnlyList<TorrentFileInfo> files)
-        {
-            Name = name;
-            Size = size;
-            Directories = directories;
-            Files = files;
-        }
-
-        static string Indent(int depth) => new string(' ', depth * 2);
+    public record TorrentDirectoryInfo(
+        string Name,
+        long Size,
+        IReadOnlyList<TorrentDirectoryInfo> Directories,
+        IReadOnlyList<TorrentFileInfo> Files
+    ) {
+        static string Indent(int depth) => new(' ', depth * 2);
 
         string ToStringHelper(int depth) =>
             $"{Indent(depth)}{Name} ({Size}){Environment.NewLine}" +

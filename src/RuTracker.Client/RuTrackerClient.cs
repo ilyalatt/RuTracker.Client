@@ -30,12 +30,12 @@ namespace RuTracker.Client
         }
         public void Dispose() => _httpClient.Dispose();
 
-        async Task<string> SearchImpl(SearchRequest req, CancellationToken ct = default)
+        async Task<string> SearchImpl(SearchTopicsRequest req, CancellationToken ct = default)
         {
             var httpReq = ApiUtil.CreatePostReq(
                 url: "/forum/tracker.php",
                 session: _session,
-                ("f", string.Join(",", req.Forums)),
+                ("f", string.Join(",", req.Forums ?? new [] { -1 })),
                 ("pn", req.Author),
                 ("nm", req.Title),
                 ("tm", "-1"),
@@ -49,12 +49,12 @@ namespace RuTracker.Client
 
         public async Task<IReadOnlyList<Forum>> GetForums(CancellationToken ct = default)
         {
-            var req = new SearchRequest("");
+            var req = new SearchTopicsRequest("");
             var html = await SearchImpl(req, ct).ConfigureAwait(false);
             return Parser.ParseForums(html);
         }
 
-        public async Task<SearchResult> SearchTopics(SearchRequest req, CancellationToken ct = default)
+        public async Task<SearchResult> SearchTopics(SearchTopicsRequest req, CancellationToken ct = default)
         {
             var html = await SearchImpl(req, ct).ConfigureAwait(false);
             return Parser.ParseSearchTopicsResponse(html);

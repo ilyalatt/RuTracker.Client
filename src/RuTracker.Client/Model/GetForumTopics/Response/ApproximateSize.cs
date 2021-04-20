@@ -2,21 +2,13 @@ using System;
 using System.Globalization;
 
 namespace RuTracker.Client.Model.GetForumTopics.Response {
-    public sealed class ApproximateSize : IComparable<ApproximateSize> {
-        public readonly float Value;
-        public readonly SizeUnit Unit;
-
-        public ApproximateSize(float value, SizeUnit unit) {
-            Value = value;
-            Unit = unit;
-        }
-
-        static NumberFormatInfo SizeFormat = new NumberFormatInfo { NumberDecimalSeparator = "." };
+    public record ApproximateSize(
+        float Value,
+        SizeUnit Unit
+    ) : IComparable<ApproximateSize> {
+        static readonly NumberFormatInfo SizeFormat = new() { NumberDecimalSeparator = "." };
         
         public static ApproximateSize Parse(string s) {
-            const int kb = 1024;
-            const int mb = kb * kb;
-            const int gb = kb * kb * kb;
             var split = s.Split(' ');
             if (split.Length != 2) throw new ArgumentException($"Can not parse size text '{s}'.", nameof(s));
             var value = float.Parse(split[0], SizeFormat);

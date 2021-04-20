@@ -32,7 +32,12 @@ namespace RuTracker.Client
             var children = elm.LastElementChild.Children;
             var dirs = children.Where(IsDir).Select(ParseDir).ToList();
             var files = children.Where(IsFile).Select(ParseFile).ToList();
-            return new TorrentDirectoryInfo(name, dirs.Sum(x => x.Size) + files.Sum(x => x.Size), dirs, files);
+            return new TorrentDirectoryInfo(
+                Name: name,
+                Size: dirs.Sum(x => x.Size) + files.Sum(x => x.Size),
+                Directories: dirs,
+                Files: files
+            );
         }
 
         static TorrentDirectoryInfo ParseRoot(IElement elm)
@@ -42,14 +47,14 @@ namespace RuTracker.Client
 
             var file = ParseFile(firstChild);
             return new TorrentDirectoryInfo(
-                "./",
-                file.Size,
-                new TorrentDirectoryInfo[0], 
-                new[] { file }
+                Name: "./",
+                Size: file.Size,
+                Directories: new TorrentDirectoryInfo[0], 
+                Files: new[] { file }
             );
         }
         
-        static readonly HtmlParser HtmlParser = new HtmlParser();
+        static readonly HtmlParser HtmlParser = new();
         public static TorrentDirectoryInfo Parse(string html)
         {
             if (html == "not logged in") throw new RuTrackerClientAuthException();

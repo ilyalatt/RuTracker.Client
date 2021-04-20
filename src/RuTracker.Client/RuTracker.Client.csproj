@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
     <NullableContextOptions>enable</NullableContextOptions>
-    <WarningsAsErrors>CS8597;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8622;CS8625</WarningsAsErrors>
+    <WarningsAsErrors>nulalble</WarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>0.5.0</Version>
+    <Version>0.6.0</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -26,8 +26,12 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="0.13.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.6.0" />
+    <PackageReference Include="AngleSharp" Version="0.14.0" />
+    <PackageReference Include="IsExternalInit" Version="1.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

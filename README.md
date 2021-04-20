@@ -16,9 +16,9 @@ Use it:
 
 ```C#
 var res = await client.SearchTopics(new SearchTopicsRequest(
-    title: "Виктор Цой FLAC",
-    sortBy: SearchTopicsSortBy.Downloads,
-    sortDirection: SearchTopicsSortDirection.Descending
+    Title: "Виктор Цой FLAC",
+    SortBy: SearchTopicsSortBy.Downloads,
+    SortDirection: SearchTopicsSortDirection.Descending
 ));
 var topic = res.Topics.First();
 var torrentBytes = await client.GetTopicTorrent(topic.Id);

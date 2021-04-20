@@ -17,7 +17,7 @@ namespace RuTracker.Client
 {
     static class Parser
     {
-        static readonly HtmlParser HtmlParser = new HtmlParser();
+        static readonly HtmlParser HtmlParser = new();
 
         static void EnsureAuthorized(IHtmlDocument doc)
         {
@@ -210,7 +210,7 @@ namespace RuTracker.Client
 
             PaginatedSearchRequest? GetNextPage()
             {
-                var nextPageElm = (IHtmlAnchorElement) doc.QuerySelectorAll(".bottom_info a.pg").FirstOrDefault(x => x.Text().StartsWith("След"));
+                var nextPageElm = (IHtmlAnchorElement?) doc.QuerySelectorAll(".bottom_info a.pg").FirstOrDefault(x => x.Text().StartsWith("След"));
                 if (nextPageElm == null) return null;
                 var nextPageUrl = nextPageElm.Href;
                 var query = nextPageUrl.Substring(nextPageUrl.IndexOf('?') + 1);
@@ -242,8 +242,8 @@ namespace RuTracker.Client
             if (magnetLink == null) return null;
             
             return new Topic(
-                postHtml,
-                magnetLink
+                PostHtml: postHtml,
+                MagnetLink: magnetLink
             );
         }
 
@@ -255,9 +255,9 @@ namespace RuTracker.Client
 
             var tableElm = doc.QuerySelector("table.vf-table.forum");
             if (tableElm == null) return new GetForumTopicsResponse(
-                currentPage: 0,
-                pagesCount: 0,
-                topics: new ForumTopicInfo[0]
+                CurrentPage: 0,
+                PagesCount: 0,
+                Topics: new ForumTopicInfo[0]
             );
             var rowElms = tableElm.QuerySelectorAll("tr").ToList();
             var topicSeparatorElmIndex = rowElms.FindLastIndex(x => x.FirstElementChild.ClassList.Contains("topicSep"));
@@ -296,17 +296,17 @@ namespace RuTracker.Client
                 var lastMessageUser = ParseUserLink((IHtmlAnchorElement?) lastPostSection.QuerySelector("a[href^=profile]"));
 
                 return new ForumTopicInfo(
-                    id,
-                    title,
-                    topicStatus,
-                    author,
-                    size,
-                    seedsCount,
-                    leechesCount,
-                    repliesCount,
-                    downloadsCount,
-                    lastMessageAt,
-                    lastMessageUser
+                    Id: id,
+                    Title: title,
+                    TopicStatus: topicStatus,
+                    Author: author,
+                    Size: size,
+                    SeedsCount: seedsCount,
+                    LeechesCount: leechesCount,
+                    RepliesCount: repliesCount,
+                    DownloadsCount: downloadsCount,
+                    LastMessageAt: lastMessageAt,
+                    LastMessageUser: lastMessageUser
                 );
             }
 
@@ -326,9 +326,9 @@ namespace RuTracker.Client
             var (currentPage, pagesCount) = paginationElm == null ? (1, 1) : ParsePagination(paginationElm);
 
             return new GetForumTopicsResponse(
-                currentPage: currentPage,
-                pagesCount: pagesCount,
-                topics: topics
+                CurrentPage: currentPage,
+                PagesCount: pagesCount,
+                Topics: topics
             );
         }
     }

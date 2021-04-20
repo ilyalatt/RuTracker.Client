@@ -31,7 +31,6 @@ namespace RuTracker.Client.Playground
         static void PrintSearchResult(SearchResult searchResult) =>
             Console.WriteLine(string.Join(Environment.NewLine, searchResult.Topics.Select(x => x.Title)));
 
-        // Use BencodeNET library to parse torrent
         static void ParseTorrent(byte[] torrentBytes)
         {
             var ms = new MemoryStream(torrentBytes);
@@ -61,23 +60,23 @@ namespace RuTracker.Client.Playground
             var forum = forums.Single(x => x.Path.Last() == "Punk (lossless)");
 
             var getForumTopicsRequest = new GetForumTopicsRequest(
-                forumId: forum.Id,
-                sortBy: GetForumTopicsSortBy.Registered,
-                sortDirection: GetForumTopicsSortDirection.Ascending); 
+                ForumId: forum.Id,
+                SortBy: GetForumTopicsSortBy.Registered,
+                SortDirection: GetForumTopicsSortDirection.Ascending); 
             var firstPage = await client.GetForumTopics(getForumTopicsRequest);
             for (var i = 2; i <= Math.Min(5, firstPage.PagesCount); i++)
             {
-                var page = await client.GetForumTopics(getForumTopicsRequest.WithPage(i));
+                var page = await client.GetForumTopics(getForumTopicsRequest with { Page = i });
             }
         }
 
         static async Task Main()
         {
             using var client = await Login();
-            var req = new SearchRequest(
-                title: "Виктор Цой FLAC",
-                sortBy: SearchTopicsSortBy.Downloads,
-                sortDirection: SearchTopicsSortDirection.Descending
+            var req = new SearchTopicsRequest(
+                Title: "Виктор Цой FLAC",
+                SortBy: SearchTopicsSortBy.Downloads,
+                SortDirection: SearchTopicsSortDirection.Descending
             );
 
             // Get first page of results
