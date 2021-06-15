@@ -9,7 +9,7 @@ namespace RuTracker.Client
 {
     static class ApiUtil
     {
-        public static readonly Uri BaseUri = new("https://rutracker.org/");
+        public static Uri BaseUri = new("https://rutracker.org/");
 
         static void AddSession(HttpRequestMessage req, string session)
         {

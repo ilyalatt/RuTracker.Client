@@ -10,9 +10,14 @@ namespace RuTracker.Client
     {
         readonly HttpClient _httpClient;
 
-        public RuTrackerAuthClient(HttpClient httpClient) => _httpClient = httpClient;
-        public RuTrackerAuthClient()
+        public RuTrackerAuthClient(HttpClient httpClient, string ruTrackerBaseUrl = "https://rutracker.org/")
         {
+            _httpClient = httpClient;
+            ApiUtil.BaseUri = new Uri(ruTrackerBaseUrl);
+        }
+        public RuTrackerAuthClient(string ruTrackerBaseUrl = "https://rutracker.org/")
+        {
+            ApiUtil.BaseUri = new Uri(ruTrackerBaseUrl);
             var httpClientHandler = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip,
