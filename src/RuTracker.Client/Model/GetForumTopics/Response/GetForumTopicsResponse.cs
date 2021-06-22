@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 
-namespace RuTracker.Client.Model.GetForumTopics.Response
-{
+namespace RuTracker.Client.Model.GetForumTopics.Response {
     public record GetForumTopicsResponse(
         int CurrentPage,
         int PagesCount,

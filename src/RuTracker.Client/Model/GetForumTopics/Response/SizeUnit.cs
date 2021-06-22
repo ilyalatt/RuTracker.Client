@@ -4,6 +4,6 @@ namespace RuTracker.Client.Model.GetForumTopics.Response {
         KB,
         MB,
         GB,
-        TB,
+        TB
     }
 }

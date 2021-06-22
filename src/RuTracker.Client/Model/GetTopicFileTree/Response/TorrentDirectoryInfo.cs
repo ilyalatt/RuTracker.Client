@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RuTracker.Client.Model.GetTopicFileTree.Response
-{
+namespace RuTracker.Client.Model.GetTopicFileTree.Response {
     public record TorrentDirectoryInfo(
         string Name,
         long Size,

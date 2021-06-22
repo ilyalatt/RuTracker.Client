@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RuTracker.Client.Model.SearchTopics.Response
-{
+namespace RuTracker.Client.Model.SearchTopics.Response {
     public record SearchTopicInfo(
         int Id,
         string Title,

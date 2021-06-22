@@ -7,10 +7,13 @@ namespace RuTracker.Client.Model.GetForumTopics.Response {
         SizeUnit Unit
     ) : IComparable<ApproximateSize> {
         static readonly NumberFormatInfo SizeFormat = new() { NumberDecimalSeparator = "." };
-        
+
         public static ApproximateSize Parse(string s) {
             var split = s.Split(' ');
-            if (split.Length != 2) throw new ArgumentException($"Can not parse size text '{s}'.", nameof(s));
+            if (split.Length != 2) {
+                throw new ArgumentException($"Can not parse size text '{s}'.", nameof(s));
+            }
+
             var value = float.Parse(split[0], SizeFormat);
             var unitStr = split[1];
             var unit = unitStr switch {

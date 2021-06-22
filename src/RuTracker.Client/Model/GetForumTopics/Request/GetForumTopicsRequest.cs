@@ -1,5 +1,4 @@
-namespace RuTracker.Client.Model.GetForumTopics.Request
-{
+namespace RuTracker.Client.Model.GetForumTopics.Request {
     public record GetForumTopicsRequest(
         int ForumId,
         GetForumTopicsSortBy SortBy = GetForumTopicsSortBy.LastMessage,

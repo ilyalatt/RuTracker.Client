@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 
-namespace RuTracker.Client.Model.SearchTopics.Request
-{
+namespace RuTracker.Client.Model.SearchTopics.Request {
     public record SearchTopicsRequest(
         string Title,
         string Author = "",

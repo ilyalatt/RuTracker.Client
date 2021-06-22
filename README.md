@@ -4,17 +4,8 @@
 
 ## Quick start
 
-Create a client:
-
 ```C#
-var authClient = new RuTrackerAuthClient();
-var session = await authClient.Login("login", "password");
-var client = authClient.WithSession(session);
-```
-
-Use it:
-
-```C#
+var client = await RuTrackerClient.Login("test_account", "qwerty12345");
 var res = await client.SearchTopics(new SearchTopicsRequest(
     Title: "Виктор Цой FLAC",
     SortBy: SearchTopicsSortBy.Downloads,

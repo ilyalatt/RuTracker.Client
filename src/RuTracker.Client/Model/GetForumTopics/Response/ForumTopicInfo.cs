@@ -1,7 +1,6 @@
 using System;
 
-namespace RuTracker.Client.Model.GetForumTopics.Response
-{
+namespace RuTracker.Client.Model.GetForumTopics.Response {
     public record ForumTopicInfo(
         int Id,
         string Title,
