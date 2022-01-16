@@ -37,8 +37,8 @@ namespace RuTracker.Client {
             var recPath = new Stack<string>();
 
             static string? Text(IElement elm) {
-                var text = (elm as IHtmlOptionsGroupElement)?.Label.Trim();
-                text ??= (elm as IHtmlOptionElement)?.Label.Trim();
+                var text = (elm as IHtmlOptionsGroupElement)?.Label!.Trim();
+                text ??= (elm as IHtmlOptionElement)?.Label!.Trim();
                 const string marker = "|- ";
                 text = text != null && text.StartsWith(marker) ? text.Substring(marker.Length) : text;
                 return text;
@@ -52,7 +52,7 @@ namespace RuTracker.Client {
                 }
 
                 if (elm.NodeName == "OPTION") {
-                    var id = int.Parse(elm.GetAttribute("value"));
+                    var id = int.Parse(elm.GetAttribute("value")!);
                     var path = recPath.Reverse().ToList();
                     forums.Add(new Forum(id, path));
                 }
@@ -80,7 +80,7 @@ namespace RuTracker.Client {
                 }
             }
 
-            Traverse(doc.QuerySelector("#fs-main"));
+            Traverse(doc.QuerySelector("#fs-main")!);
 
             return forums;
         }
@@ -139,17 +139,17 @@ namespace RuTracker.Client {
             var forumMap = forums.ToDictionary(x => x.Id);
 
             SearchTopicInfo ParseTopicBriefInfo(IElement elm) {
-                var id = int.Parse(elm.Id.Split('-').Last());
+                var id = int.Parse(elm.Id!.Split('-').Last());
 
-                var statusIconText = elm.QuerySelector(".tor-icon").Text();
+                var statusIconText = elm.QuerySelector(".tor-icon")!.Text();
                 var status = StatusMapping.TryGetValue(statusIconText, out var res) ? res : TopicStatus.Unknown;
 
-                var forumUrl = ((IHtmlAnchorElement) elm.QuerySelector(".f-name a")).Href;
+                var forumUrl = ((IHtmlAnchorElement) elm.QuerySelector(".f-name a")!).Href;
                 var forumId = int.Parse(forumUrl.Split('=').Last());
                 var forum = forumMap[forumId];
 
                 var titleElm = elm.QuerySelector(".t-title");
-                var title = titleElm.QuerySelector("a").Text().Trim();
+                var title = titleElm!.QuerySelector("a")!.Text().Trim();
                 var tagsRegex = new Regex(@"^(?<tags>\(.+?\))|^(?<tags>\[.+?\])");
                 var tags = new List<string>();
                 // TODO: optimize it to O(N) instead of O(N*N)
@@ -168,20 +168,20 @@ namespace RuTracker.Client {
                 var author = ParseUserLink(authorElm);
 
                 var sizeElm = elm.QuerySelector(".tor-size");
-                var sizeInBytes = long.Parse(sizeElm.GetAttribute("data-ts_text"));
+                var sizeInBytes = long.Parse(sizeElm!.GetAttribute("data-ts_text")!);
 
                 var seedCountElm = sizeElm.NextElementSibling;
-                var seedCountValue = int.Parse(seedCountElm.GetAttribute("data-ts_text"));
+                var seedCountValue = int.Parse(seedCountElm!.GetAttribute("data-ts_text")!);
                 var seedsCount = Math.Max(0, seedCountValue); // TODO: add info about past (like -4 days)
 
                 var leechCountElm = elm.QuerySelector(".leechmed");
-                var leechesCount = int.Parse(leechCountElm.TextContent);
+                var leechesCount = int.Parse(leechCountElm!.TextContent);
 
                 var downloadsCountElm = leechCountElm.NextElementSibling;
-                var downloadsCount = int.Parse(downloadsCountElm.TextContent);
+                var downloadsCount = int.Parse(downloadsCountElm!.TextContent);
 
                 var createdDateElm = downloadsCountElm.NextElementSibling;
-                var createdAt = ParseShortTimestamp(createdDateElm.TextContent);
+                var createdAt = ParseShortTimestamp(createdDateElm!.TextContent);
 
                 return new SearchTopicInfo(
                     id,
@@ -202,7 +202,7 @@ namespace RuTracker.Client {
             var found = int.Parse(foundRegex.Match(html).Groups[1].Value);
 
             var table = doc.QuerySelector("#search-results table tbody");
-            var topics = found == 0 ? new List<SearchTopicInfo>() : table.QuerySelectorAll("tr").Select(ParseTopicBriefInfo).ToList();
+            var topics = found == 0 ? new List<SearchTopicInfo>() : table!.QuerySelectorAll("tr").Select(ParseTopicBriefInfo).ToList();
 
             PaginatedSearchRequest? GetNextPage() {
                 var nextPageElm = (IHtmlAnchorElement?) doc.QuerySelectorAll(".bottom_info a.pg").FirstOrDefault(x => x.Text().StartsWith("След"));
@@ -259,19 +259,19 @@ namespace RuTracker.Client {
                 return new GetForumTopicsResponse(
                     CurrentPage: 0,
                     PagesCount: 0,
-                    Topics: new ForumTopicInfo[0]
+                    Topics: Array.Empty<ForumTopicInfo>()
                 );
             }
 
             var rowElms = tableElm.QuerySelectorAll("tr").ToList();
-            var topicSeparatorElmIndex = rowElms.FindLastIndex(x => x.FirstElementChild.ClassList.Contains("topicSep"));
+            var topicSeparatorElmIndex = rowElms.FindLastIndex(x => x.FirstElementChild!.ClassList.Contains("topicSep"));
             var topicRows = rowElms.Skip(topicSeparatorElmIndex + 1).Where(x => x.ClassList.Contains("hl-tr"));
 
             static ForumTopicInfo ParseTopic(IElement elm) {
-                var id = int.Parse(elm.Id.Split('-').Last());
+                var id = int.Parse(elm.Id!.Split('-').Last());
 
                 var titleSection = elm.QuerySelector("td.vf-col-t-title");
-                var title = titleSection.QuerySelector("a.tt-text").Text();
+                var title = titleSection!.QuerySelector("a.tt-text")!.Text();
                 var topicAuthorElm = (IHtmlAnchorElement?) titleSection.QuerySelector("a.topicAuthor");
                 var author = ParseUserLink(topicAuthorElm);
                 // status can be not set!
@@ -279,7 +279,7 @@ namespace RuTracker.Client {
                 var topicStatus = statusIconText != null && StatusMapping.TryGetValue(statusIconText, out var res) ? res : TopicStatus.Unknown;
 
                 var torrentSection = elm.QuerySelector("td.vf-col-tor");
-                var seedsCountStr = torrentSection.QuerySelector("span.seedmed")?.Text();
+                var seedsCountStr = torrentSection!.QuerySelector("span.seedmed")?.Text();
                 var seedsCount = seedsCountStr == null ? (int?) null : int.Parse(seedsCountStr);
                 var leechesCountStr = torrentSection.QuerySelector("span.leechmed")?.Text();
                 var leechesCount = leechesCountStr == null ? (int?) null : int.Parse(leechesCountStr);
@@ -287,13 +287,13 @@ namespace RuTracker.Client {
                 var size = sizeText == null ? null : ApproximateSize.Parse(sizeText.Replace('\u00A0', ' '));
 
                 var repliesSection = elm.QuerySelector(".vf-col-replies");
-                var repliesCountElm = repliesSection.FirstElementChild;
-                var downloadsCountElm = repliesCountElm.NextElementSibling;
+                var repliesCountElm = repliesSection!.FirstElementChild;
+                var downloadsCountElm = repliesCountElm!.NextElementSibling;
                 var repliesCount = int.Parse(repliesCountElm.Text().Replace(",", ""));
                 var downloadsCount = downloadsCountElm == null ? (int?) null : int.Parse(downloadsCountElm.Text().Replace(",", ""));
 
                 var lastPostSection = elm.QuerySelector(".vf-col-last-post");
-                var lastMessageAtStr = lastPostSection.FirstElementChild.Text();
+                var lastMessageAtStr = lastPostSection!.FirstElementChild!.Text();
                 var lastMessageAt = DateTime.ParseExact(lastMessageAtStr, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
                 var lastMessageUser = ParseUserLink((IHtmlAnchorElement?) lastPostSection.QuerySelector("a[href^=profile]"));
@@ -316,7 +316,7 @@ namespace RuTracker.Client {
             var topics = topicRows.Select(ParseTopic).Where(x => x != null).Select(x => x!).ToList();
 
             static (int, int) ParsePagination(IElement paginationElm) {
-                var paginationLabelText = paginationElm.QuerySelector("p").Text();
+                var paginationLabelText = paginationElm.QuerySelector("p")!.Text();
                 var paginationRegex = new Regex(@"Страница (?<currentPage>\d+) из (?<pagesCount>\d+)");
                 var paginationMatch = paginationRegex.Match(paginationLabelText);
                 return (
