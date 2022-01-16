@@ -144,9 +144,12 @@ namespace RuTracker.Client {
                 var statusIconText = elm.QuerySelector(".tor-icon")!.Text();
                 var status = StatusMapping.TryGetValue(statusIconText, out var res) ? res : TopicStatus.Unknown;
 
-                var forumUrl = ((IHtmlAnchorElement) elm.QuerySelector(".f-name a")!).Href;
+                var forumLink = (IHtmlAnchorElement)elm.QuerySelector(".f-name a")!;
+                var forumUrl = forumLink.Href;
                 var forumId = int.Parse(forumUrl.Split('=').Last());
-                var forum = forumMap[forumId];
+                // there are forums that are not listed (like forum 535)
+                // it breaks the forum tree logic but it is a degenerate case
+                var forum = forumMap.TryGetValue(forumId, out var x) ? x : new Forum(forumId, new[] { forumLink.Text });
 
                 var titleElm = elm.QuerySelector(".t-title");
                 var title = titleElm!.QuerySelector("a")!.Text().Trim();
