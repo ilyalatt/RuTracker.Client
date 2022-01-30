@@ -33,7 +33,7 @@ namespace RuTracker.Client.Model.GetForumTopics.Response {
             return (Unit, Value).CompareTo((other.Unit, other.Value));
         }
 
-        public long EstimateSize() {
+        public long EstimateSizeInBytes() {
             const long b = 1;
             const long kb = 1024;
             const long mb = kb * kb;

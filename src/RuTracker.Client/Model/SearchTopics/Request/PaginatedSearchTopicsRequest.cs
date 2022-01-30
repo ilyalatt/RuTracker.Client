@@ -1,5 +1,5 @@
 namespace RuTracker.Client.Model.SearchTopics.Request {
-    public record PaginatedSearchRequest(
+    public record PaginatedSearchTopicsRequest(
         string SearchId,
         int Offset
     );

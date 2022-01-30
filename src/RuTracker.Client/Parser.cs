@@ -15,23 +15,45 @@ using RuTracker.Client.Model.SearchTopics.Response;
 
 namespace RuTracker.Client {
     static class Parser {
-        static readonly HtmlParser HtmlParser = new();
+        static readonly HtmlParser HtmlParser = new(new HtmlParserOptions {
+            IsStrictMode = true
+        });
 
-        static void EnsureAuthorized(IHtmlDocument doc) {
+        static void CheckAuthorizationError(IHtmlDocument doc) {
             if (doc.QuerySelector("#logged-in-username") == null) {
                 throw new RuTrackerClientAuthException("The client is not authorized.");
             }
         }
 
-        static void EnsureSessionIsNotStaled(string html) {
+        static void CheckSessionIsStaledError(string html) {
             if (html.Contains("Сессия устарела")) {
                 throw new RuTrackerStaleSessionException();
             }
         }
 
-        public static IReadOnlyList<Forum> ParseForums(string html) {
+        static IHtmlDocument ParseAndCheck(string html) {
+            CheckSessionIsStaledError(html);
             var doc = HtmlParser.ParseDocument(html);
-            EnsureAuthorized(doc);
+            CheckAuthorizationError(doc);
+            return doc;
+        }
+
+        public static void CheckAuthorization(string html) {
+            if (html.Contains("введите код подтверждения")) {
+                throw new RuTrackerClientAuthException("Captcha verification is required.");
+            }
+            
+            if (html.Contains("неверный пароль")) {
+                throw new RuTrackerClientAuthException("Incorrect login/password.");
+            }
+
+            if (!html.Contains("log-out-icon")) {
+                throw new RuTrackerClientAuthException("Unknown reason.");
+            }
+        }
+
+        public static IReadOnlyList<Forum> ParseForums(string html) {
+            var doc = ParseAndCheck(html);
 
             var forums = new List<Forum>();
             var recPath = new Stack<string>();
@@ -132,8 +154,7 @@ namespace RuTracker.Client {
         }
 
         public static SearchResult ParseSearchTopicsResponse(string html) {
-            EnsureSessionIsNotStaled(html);
-            var doc = HtmlParser.ParseDocument(html);
+            var doc = ParseAndCheck(html);
 
             var forums = ParseForums(html);
             var forumMap = forums.ToDictionary(x => x.Id);
@@ -207,7 +228,7 @@ namespace RuTracker.Client {
             var table = doc.QuerySelector("#search-results table tbody");
             var topics = found == 0 ? new List<SearchTopicInfo>() : table!.QuerySelectorAll("tr").Select(ParseTopicBriefInfo).ToList();
 
-            PaginatedSearchRequest? GetNextPage() {
+            PaginatedSearchTopicsRequest? GetNextPage() {
                 var nextPageElm = (IHtmlAnchorElement?) doc.QuerySelectorAll(".bottom_info a.pg").FirstOrDefault(x => x.Text().StartsWith("След"));
                 if (nextPageElm == null) {
                     return null;
@@ -218,7 +239,7 @@ namespace RuTracker.Client {
                 var queryDict = query.Split('&').Select(x => x.Split('=')).ToDictionary(x => x[0], x => x[1]);
                 var searchId = queryDict["search_id"];
                 var offset = int.Parse(queryDict["start"]);
-                return new PaginatedSearchRequest(searchId, offset);
+                return new PaginatedSearchTopicsRequest(searchId, offset);
             }
 
             var nextPage = GetNextPage();
@@ -232,8 +253,7 @@ namespace RuTracker.Client {
         }
 
         public static Topic? ParseTorrentTopic(string html) {
-            EnsureSessionIsNotStaled(html);
-            var doc = HtmlParser.ParseDocument(html);
+            var doc = ParseAndCheck(html);
 
             var postHtml = doc.QuerySelector(".post_body")?.InnerHtml;
             if (postHtml == null) {
@@ -254,8 +274,7 @@ namespace RuTracker.Client {
 
         // TODO: parse pinned forums
         public static GetForumTopicsResponse ParseForumTopicsResponse(string html) {
-            EnsureSessionIsNotStaled(html);
-            var doc = HtmlParser.ParseDocument(html);
+            var doc = ParseAndCheck(html);
 
             var tableElm = doc.QuerySelector("table.vf-table.forum");
             if (tableElm == null) {

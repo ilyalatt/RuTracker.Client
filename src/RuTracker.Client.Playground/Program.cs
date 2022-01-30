@@ -47,9 +47,8 @@ static async Task TestForumTopicsScraping(RuTrackerClient client) {
     }
 }
 
-const string login = "cyberpunk777";
-const string password = "cyberpunk";
-using var client = await RuTrackerClient.Login(login, password);
+using var client = new RuTrackerClient();
+await client.Login("cyberpunk777", "cyberpunk");
 
 var req = new SearchTopicsRequest(
     Title: "Виктор Цой FLAC",
@@ -62,8 +61,8 @@ var resp = await client.SearchTopics(req);
 Console.WriteLine($"Found {resp.Found} topics");
 PrintSearchResult(resp);
 
-// Download torrent
-// var torrentBytes = await client.GetTorrent(resp.Topics.First().Id);
+// Download torrent file
+// var torrentBytes = await client.GetTopicTorrentFile(resp.Topics.First().Id);
 // ParseTorrent(torrentBytes);
 
 // Get a magnet link of the first topic
